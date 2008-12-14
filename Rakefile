@@ -1,5 +1,6 @@
 require 'pathname'
 require 'rubygems'
+require 'hoe'
 
 ROOT    = Pathname(__FILE__).dirname.expand_path
 JRUBY   = RUBY_PLATFORM =~ /java/
@@ -23,3 +24,5 @@ PROJECT_DESCRIPTION = PROJECT_SUMMARY = 'DataMapper plugin for for counter cache
 [ ROOT, ROOT.parent ].each do |dir|
   Pathname.glob(dir.join('tasks/**/*.rb').to_s).each { |f| require f }
 end
+
+require 'tasks/hoe'
