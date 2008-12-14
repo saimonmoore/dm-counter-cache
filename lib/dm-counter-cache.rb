@@ -39,11 +39,15 @@ module DataMapper
             after :destroy, :decrement_counter_cache_for_#{parent_name}
           
             def increment_counter_cache_for_#{parent_name}
-              self.#{parent_name}.update_attributes(:#{counter_cache_attribute} => self.#{parent_name}.#{counter_cache_attribute}.succ)
+              if self.type == #{model.name}
+                self.#{parent_name}.update_attributes(:#{counter_cache_attribute} => self.#{parent_name}.#{counter_cache_attribute}.succ)
+              end
             end
 
             def decrement_counter_cache_for_#{parent_name}
-              self.#{parent_name}.update_attributes(:#{counter_cache_attribute} => self.#{parent_name}.#{counter_cache_attribute} - 1)
+              if self.type == #{model.name}
+                self.#{parent_name}.update_attributes(:#{counter_cache_attribute} => self.#{parent_name}.#{counter_cache_attribute} - 1)
+              end
             end
             
           EOS

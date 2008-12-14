@@ -6,10 +6,8 @@ describe DataMapper::CounterCacheable do
     class Post
       include DataMapper::Resource
 
-      has n, :comments
-
       property :id, Integer, :serial => true
-      property :comments_count, Integer, :default => 0
+      has n, :comments
     end
     
     class Comment
