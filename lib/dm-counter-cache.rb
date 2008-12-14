@@ -32,9 +32,11 @@ module DataMapper
               counter_cache_attribute = "#{model.storage_name}_count".to_s
           end
 
-          relationship.parent_model.class_eval <<-EOS, __FILE__, __LINE__
-            property :#{counter_cache_attribute}, Integer, :default => 0, :lazy => false          
-          EOS
+          unless relationship.parent_model.has_property?(counter_cache_attribute.intern)
+            relationship.parent_model.class_eval <<-EOS, __FILE__, __LINE__
+              property :#{counter_cache_attribute}, Integer, :default => 0, :lazy => false          
+            EOS            
+          end
 
           model.class_eval <<-EOS, __FILE__, __LINE__            
             after :create, :increment_counter_cache_for_#{name}
