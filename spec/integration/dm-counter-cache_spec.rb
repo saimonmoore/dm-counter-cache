@@ -19,17 +19,53 @@ describe DataMapper::CounterCacheable do
 
     end
     
+    class User
+      include DataMapper::Resource
+
+      property :id, Integer, :serial => true
+
+      has n, :group_memberships
+      has n, :groups, :through => :group_memberships, :class_name => "Group", :remote_name => :group, :parent_key => [:id], :child_key => [:user_id]
+    end
+    
+    class Group
+      include DataMapper::Resource
+
+      property :id, Integer, :serial => true      
+      has n, :group_memberships
+      has n, :members, :through => :group_memberships, :class_name => "User", :remote_name => :user, :parent_key => [:id], :child_key => [:group_id]
+    end
+
+    class GroupMembership
+      include DataMapper::Resource
+      include DataMapper::CounterCacheable
+
+      property :id, Serial
+
+      belongs_to :group, :counter_cache => :members_count
+      belongs_to :user, :counter_cache => :groups_count
+    end    
+
+    GroupMembership.auto_migrate!
+    User.auto_migrate!
+    Group.auto_migrate!
     Comment.auto_migrate!
     Post.auto_migrate!
   end
 
   before(:each) do
     @post = Post.create
+    @user = User.create
+    @group = Group.create
   end
 
   it "should increment comments_count" do
     @post.comments.create
     @post.reload.comments_count.should == 1
+    
+    @user.group_memberships.create(:group => @group)
+    @user.reload.groups_count.should == 1
+    @group.reload.members_count.should == 1
   end
 
   it "should decrement comments_count" do
@@ -37,6 +73,12 @@ describe DataMapper::CounterCacheable do
     comment2 = @post.comments.create
     comment2.destroy
     @post.reload.comments_count.should == 1
+    
+    gm1 = @user.group_memberships.create(:group => @group)
+    gm2 = @user.group_memberships.create(:group => @group)
+    gm2.destroy
+    @user.reload.groups_count.should == 1
+    @group.reload.members_count.should == 1    
   end
 
 end

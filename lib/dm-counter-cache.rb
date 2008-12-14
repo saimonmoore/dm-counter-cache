@@ -7,10 +7,14 @@ module DataMapper
     def self.included(klass)      
       DataMapper::Associations::ManyToOne.module_eval {
         extend DataMapper::CounterCacheable::ClassMethods
+        
         (class << self; self; end).class_eval do
-          alias_method :setup_without_counter_caching, :setup
-          alias_method :setup, :setup_with_counter_caching
+          unless method_defined?(:setup_without_counter_caching)
+            alias_method :setup_without_counter_caching, :setup 
+            alias_method :setup, :setup_with_counter_caching
+          end
         end
+
       }
     end
 
@@ -23,9 +27,9 @@ module DataMapper
         if counter_cache_attribute
           case counter_cache_attribute
             when String, Symbol
-              counter_cache_attribute = counter_cache_attribute.intern
+              counter_cache_attribute = counter_cache_attribute.to_s
             else
-              counter_cache_attribute = "#{model.storage_name}_count".intern
+              counter_cache_attribute = "#{model.storage_name}_count".to_s
           end
 
           relationship.parent_model.class_eval <<-EOS, __FILE__, __LINE__
@@ -39,13 +43,13 @@ module DataMapper
             after :destroy, :decrement_counter_cache_for_#{parent_name}
           
             def increment_counter_cache_for_#{parent_name}
-              if self.type == #{model.name}
+              if self.class == #{model.name}
                 self.#{parent_name}.update_attributes(:#{counter_cache_attribute} => self.#{parent_name}.#{counter_cache_attribute}.succ)
               end
             end
 
             def decrement_counter_cache_for_#{parent_name}
-              if self.type == #{model.name}
+              if self.class == #{model.name}
                 self.#{parent_name}.update_attributes(:#{counter_cache_attribute} => self.#{parent_name}.#{counter_cache_attribute} - 1)
               end
             end
