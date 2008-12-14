@@ -43,13 +43,13 @@ module DataMapper
             after :destroy, :decrement_counter_cache_for_#{name}
           
             def increment_counter_cache_for_#{name}
-              if self.class == #{model.name}
+              if self.#{name} && self.class == #{model.name}
                 self.#{name}.update_attributes(:#{counter_cache_attribute} => self.#{name}.reload.#{counter_cache_attribute}.succ)
               end
             end
 
             def decrement_counter_cache_for_#{name}
-              if self.class == #{model.name}
+              if self.#{name} && self.class == #{model.name}
                 self.#{name}.update_attributes(:#{counter_cache_attribute} => self.#{name}.reload.#{counter_cache_attribute} - 1)
               end
             end
