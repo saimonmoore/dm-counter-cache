@@ -43,7 +43,7 @@ describe DataMapper::CounterCacheable do
       property :id, Serial
 
       belongs_to :group, :counter_cache => :members_count
-      belongs_to :user, :counter_cache => :groups_count
+      belongs_to :member, :class_name => "User", :child_key => [:user_id], :counter_cache => :groups_count
     end    
 
     GroupMembership.auto_migrate!
