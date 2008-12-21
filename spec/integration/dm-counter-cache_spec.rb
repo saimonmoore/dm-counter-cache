@@ -7,6 +7,7 @@ describe DataMapper::CounterCacheable do
       include DataMapper::Resource
 
       property :id, Integer, :serial => true
+      property :comments_count, Integer, :default => 0
       has n, :comments
     end
     
@@ -23,6 +24,7 @@ describe DataMapper::CounterCacheable do
       include DataMapper::Resource
 
       property :id, Integer, :serial => true
+      property :groups_count, Integer, :default => 0      
 
       has n, :group_memberships
       has n, :groups, :through => :group_memberships, :class_name => "Group", :remote_name => :group, :parent_key => [:id], :child_key => [:user_id]
@@ -31,7 +33,8 @@ describe DataMapper::CounterCacheable do
     class Group
       include DataMapper::Resource
 
-      property :id, Integer, :serial => true      
+      property :id, Integer, :serial => true
+      property :members_count, Integer, :default => 0
       has n, :group_memberships
       has n, :members, :through => :group_memberships, :class_name => "User", :remote_name => :user, :parent_key => [:id], :child_key => [:group_id]
     end
