@@ -33,20 +33,22 @@ module DataMapper
           end
 
           model.class_eval <<-EOS, __FILE__, __LINE__            
-            after :create, :increment_counter_cache_for_#{name}
-            after :destroy, :decrement_counter_cache_for_#{name}
+            unless method_defined?(:increment_counter_cache_for_#{name})
+              after :create, :increment_counter_cache_for_#{name}
+              after :destroy, :decrement_counter_cache_for_#{name}
           
-            def increment_counter_cache_for_#{name}
-              return unless ::#{relationship.parent_model}.properties.has_property?(:#{counter_cache_attribute})
-              if self.#{name} && self.class == #{model.name}
-                self.#{name}.update_attributes(:#{counter_cache_attribute} => self.#{name}.reload.#{counter_cache_attribute}.succ)
+              def increment_counter_cache_for_#{name}
+                return unless ::#{relationship.parent_model}.properties.has_property?(:#{counter_cache_attribute})
+                if self.#{name} && self.class == #{model.name}
+                  self.#{name}.update_attributes(:#{counter_cache_attribute} => self.#{name}.reload.#{counter_cache_attribute}.succ)
+                end
               end
-            end
 
-            def decrement_counter_cache_for_#{name}
-              return unless ::#{relationship.parent_model}.properties.has_property?(:#{counter_cache_attribute})
-              if self.#{name} && self.class == #{model.name}
-                self.#{name}.update_attributes(:#{counter_cache_attribute} => self.#{name}.reload.#{counter_cache_attribute} - 1)
+              def decrement_counter_cache_for_#{name}
+                return unless ::#{relationship.parent_model}.properties.has_property?(:#{counter_cache_attribute})
+                if self.#{name} && self.class == #{model.name}
+                  self.#{name}.update_attributes(:#{counter_cache_attribute} => self.#{name}.reload.#{counter_cache_attribute} - 1)
+                end
               end
             end
             
